@@ -119,10 +119,13 @@
   opacity: 0;
   transform: translateY(6px);
   transition: opacity 0.5s var(--ease), transform 0.5s var(--ease);
+  /* Invisible while the boot log types, so it must not take taps either. */
+  pointer-events: none;
 }
 .menuVisible {
   opacity: 1;
   transform: none;
+  pointer-events: auto;
 }
 .menuLabel {
   font-size: 12px;
@@ -142,23 +145,44 @@
   border-radius: 3px;
   color: inherit;
   transition: background 0.14s linear, color 0.14s linear, border-color 0.14s linear;
+  /* No double-tap-zoom wait and no grey iOS tap flash; :active below is the
+     touch feedback instead. */
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
-.item:hover,
-.item:focus-visible {
-  /* Classic DOS inverted selection. */
+/* Classic DOS inverted selection.
+   :hover only where a real pointer can hover. On touch screens a :hover rule
+   that reveals something (the arrow, the inverted row) makes iOS Safari spend
+   the first tap on showing the hover state instead of clicking. */
+.item:focus-visible,
+.item:active {
   background: var(--green);
   color: #04140b;
   text-shadow: none;
   outline: none;
 }
-.item:hover .arrow,
-.item:focus-visible .arrow {
+.item:focus-visible .arrow,
+.item:active .arrow {
   opacity: 1;
 }
-.itemAmber:hover,
-.itemAmber:focus-visible {
+.itemAmber:focus-visible,
+.itemAmber:active {
   background: var(--amber);
   color: #170d02;
+}
+@media (hover: hover) {
+  .item:hover {
+    background: var(--green);
+    color: #04140b;
+    text-shadow: none;
+  }
+  .item:hover .arrow {
+    opacity: 1;
+  }
+  .itemAmber:hover {
+    background: var(--amber);
+    color: #170d02;
+  }
 }
 .arrow {
   opacity: 0;
@@ -250,7 +274,9 @@
   font-size: 10px;
 }
 .compact .item {
-  padding: 3px 7px;
+  /* Taller than the text needs: this is a finger target. 3px left the rows
+     ~18 CSS px high on a phone. The 264px-tall screen has just enough slack. */
+  padding: 6px 7px;
   gap: 8px;
 }
 .compact .file {

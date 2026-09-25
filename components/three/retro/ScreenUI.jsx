@@ -114,6 +114,14 @@ export default function ScreenUI({ booted, position }) {
     return () => clearInterval(id);
   }, []);
 
+  // <Html> content isn't a <Link>, so nothing prefetches the routes for us.
+  // This used to happen on hover, which never fires for touch — warm them as
+  // soon as the menu appears instead, so a tap navigates immediately.
+  useEffect(() => {
+    if (!done) return;
+    shared.programs.forEach((p) => p.href && router.prefetch(p.href));
+  }, [done, router]);
+
   /**
    * Fade the overlay out as the camera leaves the hero. <Html transform> always
    * composites above the WebGL canvas, so without this the terminal would float
@@ -171,13 +179,13 @@ export default function ScreenUI({ booted, position }) {
             <button
               key={p.id}
               className={`${styles.item} ${p.accent === "amber" ? styles.itemAmber : ""}`}
-              onPointerEnter={() => {
-                setHovered(p.id);
-                // <Html> content isn't a <Link>, so nothing prefetches the
-                // route for us — warm it on hover instead.
-                if (p.href) router.prefetch(p.href);
-              }}
-              onPointerLeave={() => setHovered(null)}
+              // Hover is mouse-only. On iOS a tap first fires the hover
+              // events, and if they change what is on screen (the blurb, the
+              // arrow, the inverted row) Safari treats the tap as "reveal
+              // hover content" and swallows the click — the program only
+              // opened on a second tap, if at all.
+              onPointerEnter={(e) => e.pointerType === "mouse" && setHovered(p.id)}
+              onPointerLeave={(e) => e.pointerType === "mouse" && setHovered(null)}
               onFocus={() => setHovered(p.id)}
               onBlur={() => setHovered(null)}
               // Programs with a page of their own navigate; the rest scroll to
