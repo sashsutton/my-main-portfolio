@@ -52,8 +52,12 @@
   font-size: 12px;
   letter-spacing: 0.1em;
   padding-bottom: 8px;
-  border-bottom: 1px solid rgba(124, 255, 178, 0.28);
 }
+/* The status bar, the scroll hint and the blurb used to carry divider rules
+   (border-bottom / border-top / border-left). Safari painted each of those
+   bordered blocks as a filled pale rectangle on the tube — three light boxes
+   framing the text — so the terminal now separates its parts with spacing
+   alone. */
 .led {
   display: inline-block;
   width: 7px;
@@ -62,6 +66,8 @@
   background: var(--amber);
   box-shadow: 0 0 8px var(--amber);
   animation: pulse 2.4s ease-in-out infinite;
+  /* Own compositor layer, so the pulse never repaints the status bar. */
+  will-change: opacity;
 }
 @keyframes pulse {
   0%, 100% { opacity: 0.4; }
@@ -98,6 +104,7 @@
   background: var(--green);
   box-shadow: 0 0 10px rgba(124, 255, 178, 0.8);
   animation: blink 1.05s steps(1) infinite;
+  will-change: opacity;
 }
 @keyframes blink {
   0%, 55% { opacity: 1; }
@@ -173,7 +180,6 @@
   font-size: 12.5px;
   line-height: 1.45;
   opacity: 0.72;
-  border-left: 1px solid rgba(124, 255, 178, 0.3);
 }
 
 /* ---------------------------------------------------------------------- foot */
@@ -188,7 +194,6 @@
   font-size: 14px;
   letter-spacing: 0.12em;
   padding-top: 8px;
-  border-top: 1px solid rgba(124, 255, 178, 0.28);
 }
 .scrollHint {
   display: inline-flex;
@@ -196,7 +201,11 @@
   gap: 8px;
 }
 .chevron {
+  /* inline-block: a transform on a plain inline span is ignored, so the nudge
+     only ever animated opacity. */
+  display: inline-block;
   animation: nudge 1.8s var(--ease) infinite;
+  will-change: transform, opacity;
 }
 @keyframes nudge {
   0%, 100% { transform: translateY(0); opacity: 0.5; }
