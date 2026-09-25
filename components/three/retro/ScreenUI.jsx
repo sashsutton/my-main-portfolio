@@ -9,6 +9,8 @@ import { useTypewriter } from "@/components/ui/useTypewriter";
 import { scrollToId } from "@/components/providers/SmoothScroll";
 import { scrollRef, useAppStore } from "@/lib/store";
 import { shared } from "@/lib/content";
+import { getFitDistance } from "../CameraRig";
+import { HERO_FIT } from "./framing";
 import styles from "./screen.module.css";
 
 /**
@@ -58,12 +60,33 @@ const COMPACT = {
   df: (400 * SCREEN_W) / 380,
 };
 
+/**
+ * Below this many CSS px of on-page screen width, the VGA layout's 15px type
+ * would render under ~10px, so the compact one takes over.
+ *
+ * This is measured, not guessed from the viewport. Viewport width alone gets
+ * it wrong both ways: a phone held landscape (844 x 390) is "wide", yet the
+ * camera frames the machine by height there, so the tube is only ~240px across
+ * and VGA type came out at ~5px; an iPad in portrait is "narrow", yet its tube
+ * is ~600px across and has room for the full layout.
+ */
+const COMPACT_BELOW_PX = 420;
+
+/** On-page width, in CSS px, of the tube at the hero camera pose. */
+function projectedScreenWidth(width, height, fov, screenZ) {
+  const cameraZ = HERO_FIT.baseZ + getFitDistance(HERO_FIT, width, height, fov);
+  const vFov = (fov * Math.PI) / 180;
+  const visibleW = 2 * Math.tan(vFov / 2) * (width / height) * (cameraZ - screenZ);
+  return (SCREEN_W / visibleW) * width;
+}
+
 export default function ScreenUI({ booted, position }) {
   const { t } = useLang();
   const router = useRouter();
-  const viewportWidth = useThree((s) => s.size.width);
-  const aspect = useThree((s) => s.size.width / s.size.height);
-  const compact = viewportWidth < 820 || aspect < 1;
+  const width = useThree((s) => s.size.width);
+  const height = useThree((s) => s.size.height);
+  const fov = useThree((s) => s.camera.fov);
+  const compact = projectedScreenWidth(width, height, fov, position[2]) < COMPACT_BELOW_PX;
   const box = compact ? COMPACT : FULL;
   const hovered = useAppStore((s) => s.hoveredProgram);
   const setHovered = useAppStore((s) => s.setHoveredProgram);

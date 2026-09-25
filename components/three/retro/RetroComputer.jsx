@@ -68,14 +68,20 @@ export default function RetroComputer({ position = [0, 0, 0] }) {
       <Keyboard position={[0.05, -1.915, 2.05]} rotation={[0, -0.05, 0]} />
 
       {/* Green spill from the tube onto the bezel and desk. This is what makes
-          the CRT read as the light source rather than a lit surface. */}
+          the CRT read as the light source rather than a lit surface.
+
+          Hung above the tube's axis, not on it. The glass is a near-flat
+          mirror facing the camera, so a light straight in front of it
+          (0, 0.1, 1.9) reflected as a hard glowing dot dead-centre on the
+          screen. From up here its reflection lands on the top bezel, off the
+          glass, for every camera pose in the scroll. */}
       <pointLight
         ref={screenGlow}
         color="#7cffb2"
         intensity={0}
-        distance={4.5}
+        distance={5.5}
         decay={2}
-        position={[0, 0.1, 1.9]}
+        position={[0, 1.75, 2.3]}
         castShadow={!lowPower}
         shadow-mapSize={[512, 512]}
       />

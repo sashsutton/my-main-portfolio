@@ -4,6 +4,7 @@ import { Environment, Lightformer, ContactShadows, AdaptiveDpr, Preload } from "
 import RetroComputer from "./retro/RetroComputer";
 import Desk from "./retro/Desk";
 import CameraRig from "./CameraRig";
+import { HERO_FIT } from "./retro/framing";
 import { useAppStore } from "@/lib/store";
 
 /**
@@ -24,16 +25,6 @@ const KEYFRAMES = [
   // contact — the machine left alone on the desk, nearly lost in the fog
   { at: 1.0, pos: [0.0, 4.8, 17.0], look: [0, -1.9, 0] },
 ];
-
-/**
- * Portrait framing width. This has to clear the *shell* (3.34 wide), not just
- * the screen (2.56): framing tight to the screen crops the beige sides off, so
- * the tube looks like it is bursting out of the machine rather than mounted in
- * it. 3.3 shows the whole computer — both side bezels and the rounded corners —
- * with the screen clearly seated inside it. The cost is a slightly smaller
- * on-screen terminal, which is why the copy has its own shorter `introCompact`.
- */
-const FIT = { landscape: 5, portrait: 3.3, subjectZ: 1.21, baseZ: 7.4 };
 
 /**
  * Everything inside the hero Canvas except post-processing.
@@ -80,11 +71,13 @@ export default function HeroScene() {
       <directionalLight position={[5, 1.5, -6]} intensity={0.75} color="#ffc98a" />
 
       {/* Reflections only — kept low-key. A strong green lightformer here reads
-          as "the whole room is green" rather than "the tube is glowing". */}
+          as "the whole room is green" rather than "the tube is glowing".
+          There is deliberately nothing straight in front of the tube: the
+          glass is a near-flat mirror facing the camera, so anything placed
+          there reflects as a glowing blob dead-centre on the screen. */}
       <Environment resolution={lowPower ? 64 : 256} frames={1}>
         <Lightformer form="rect" intensity={2.2} color="#9fc0e8" scale={[10, 6, 1]} position={[-6, 5, 3]} target={[0, 0, 0]} />
         <Lightformer form="rect" intensity={1.0} color="#ffcf9a" scale={[8, 4, 1]} position={[6, 2, -5]} target={[0, 0, 0]} />
-        <Lightformer form="ring" intensity={0.5} color="#7cffb2" scale={3} position={[0, 0.2, 5]} target={[0, 0, 0]} />
         <Lightformer form="rect" intensity={0.6} color="#ffffff" scale={[14, 14, 1]} position={[0, 9, 0]} rotation={[Math.PI / 2, 0, 0]} />
       </Environment>
 
@@ -105,7 +98,7 @@ export default function HeroScene() {
 
       <RetroComputer position={[0, 0, 0]} />
 
-      <CameraRig keyframes={KEYFRAMES} fit={FIT} />
+      <CameraRig keyframes={KEYFRAMES} fit={HERO_FIT} />
 
       {/* Drop resolution automatically if the frame budget is blown. */}
       <AdaptiveDpr pixelated />

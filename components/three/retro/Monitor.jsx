@@ -60,10 +60,12 @@ function PlasticMaterial({ tone = "#d8c49a" }) {
   return <meshStandardMaterial color={tone} roughness={0.72} metalness={0.02} />;
 }
 
+const BEZEL_R = 0.045;
+
 /** One bar of the front bezel. Four of these frame the tube. */
 function BezelBar({ args, position }) {
   return (
-    <RoundedBox args={args} radius={0.045} smoothness={3} position={position} castShadow>
+    <RoundedBox args={args} radius={BEZEL_R} smoothness={3} position={position} castShadow>
       <PlasticMaterial />
     </RoundedBox>
   );
@@ -115,7 +117,10 @@ export default function Monitor({ booted }) {
         <meshStandardMaterial color="#0a0d0c" roughness={0.4} metalness={0.1} />
       </RoundedBox>
 
-      <CRTScreen booted={booted} position={[0, SCREEN_Y, Z.phosphor]} />
+      {/* Dimmed to the dark-phosphor tone the terminal type is read against.
+          This is the whole screen's backdrop now — the DOM overlay paints no
+          panel of its own — so at full intensity the text washed out. */}
+      <CRTScreen booted={booted} intensity={0.34} position={[0, SCREEN_Y, Z.phosphor]} />
       <ScreenUI booted={booted} position={[0, SCREEN_Y, Z.screenUI]} />
 
       {/* Curved glass over the phosphor: picks up the Environment reflection.
@@ -151,6 +156,10 @@ export default function Monitor({ booted }) {
       </mesh>
 
       {/* ---------------------------------------------------------- bezel --- */}
+      {/* The side bars run BEZEL_R past the opening into the top and bottom
+          bars. Cut flush, each bar's rounded end met the neighbour's rounded
+          edge in a V-groove, which read as a little square notch at every
+          corner of the screen. Overlapping buries both roundings. */}
       <BezelBar
         args={[SHELL.halfW * 2, SHELL.halfH - OPENING.top, bezelD]}
         position={[0, (SHELL.halfH + OPENING.top) / 2, bezelZ]}
@@ -160,11 +169,11 @@ export default function Monitor({ booted }) {
         position={[0, (-SHELL.halfH + OPENING.bottom) / 2, bezelZ]}
       />
       <BezelBar
-        args={[SHELL.halfW - OPENING.halfW, OPENING.top - OPENING.bottom, bezelD]}
+        args={[SHELL.halfW - OPENING.halfW, OPENING.top - OPENING.bottom + 2 * BEZEL_R, bezelD]}
         position={[-(SHELL.halfW + OPENING.halfW) / 2, SCREEN_Y, bezelZ]}
       />
       <BezelBar
-        args={[SHELL.halfW - OPENING.halfW, OPENING.top - OPENING.bottom, bezelD]}
+        args={[SHELL.halfW - OPENING.halfW, OPENING.top - OPENING.bottom + 2 * BEZEL_R, bezelD]}
         position={[(SHELL.halfW + OPENING.halfW) / 2, SCREEN_Y, bezelZ]}
       />
 

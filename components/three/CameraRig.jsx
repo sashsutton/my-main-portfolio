@@ -21,9 +21,36 @@ import { scrollRef } from "@/lib/store";
  *                   { landscape, portrait, subjectZ, baseZ }. `subjectZ` is how
  *                   far in front of the origin the thing being framed actually
  *                   sits — omit it and the fit overestimates the distance and
- *                   crops the subject's edges.
+ *                   crops the subject's edges. Optional `nearer: [{ width, z }]`
+ *                   lists anything in front of the subject that must also fit.
  * @param damping    lower = heavier, laggier camera
  */
+/**
+ * How much further back than `fit.baseZ` the camera must sit so the subject
+ * fits the viewport's width. Pure, so anything that needs to know the framing
+ * ahead of time (the CRT's DOM overlay picks its layout from it) gets exactly
+ * the numbers the rig will use.
+ */
+export function getFitDistance(fit, width, height, fov) {
+  const aspect = width / height;
+  const portrait = aspect < 1;
+
+  const subjectWidth = portrait ? fit.portrait : fit.landscape;
+  const subjectZ = portrait ? (fit.subjectZ ?? 0) : 0;
+
+  const vFov = (fov * Math.PI) / 180;
+  const span = 2 * Math.tan(vFov / 2) * aspect;
+  let needed = subjectWidth / span + subjectZ;
+
+  // Anything nearer the camera than the main subject grows faster as the
+  // camera closes in, so it can be the thing that clips even when narrower.
+  if (portrait && fit.nearer) {
+    for (const { width, z } of fit.nearer) needed = Math.max(needed, width / span + z);
+  }
+
+  return Math.max(0, needed - fit.baseZ);
+}
+
 export default function CameraRig({
   keyframes,
   fit = { landscape: 5, portrait: 3, subjectZ: 0, baseZ: 7.4 },
@@ -34,17 +61,11 @@ export default function CameraRig({
   const look = useMemo(() => new THREE.Vector3(), []);
   const currentLook = useRef(new THREE.Vector3(...keyframes[0].look));
 
-  const fitDistance = useMemo(() => {
-    const aspect = size.width / size.height;
-    const portrait = aspect < 1;
-
-    const subjectWidth = portrait ? fit.portrait : fit.landscape;
-    const subjectZ = portrait ? (fit.subjectZ ?? 0) : 0;
-
-    const vFov = (camera.fov * Math.PI) / 180;
-    const needed = subjectWidth / (2 * Math.tan(vFov / 2) * aspect) + subjectZ;
-    return Math.max(0, needed - fit.baseZ);
-  }, [size.width, size.height, camera.fov, fit.portrait, fit.landscape, fit.subjectZ, fit.baseZ]);
+  const fitDistance = useMemo(
+    () => getFitDistance(fit, size.width, size.height, camera.fov),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [size.width, size.height, camera.fov, fit.portrait, fit.landscape, fit.subjectZ, fit.baseZ, fit.nearer]
+  );
 
   useFrame((state, delta) => {
     const progress = THREE.MathUtils.clamp(scrollRef.current, 0, 1);
