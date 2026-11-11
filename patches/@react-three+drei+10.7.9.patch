@@ -1,0 +1,46 @@
+diff --git a/node_modules/@react-three/drei/web/Html.js b/node_modules/@react-three/drei/web/Html.js
+index 81d68b7..bd078d9 100644
+--- a/node_modules/@react-three/drei/web/Html.js
++++ b/node_modules/@react-three/drei/web/Html.js
+@@ -114,6 +114,7 @@ const Html = /* @__PURE__ */React.forwardRef(({
+   } = useThree();
+   const [el] = React.useState(() => document.createElement(as));
+   const root = React.useRef(null);
++  const pendingUnmount = React.useRef(null);
+   const group = React.useRef(null);
+   const oldZoom = React.useRef(0);
+   const oldPosition = React.useRef([0, 0]);
+@@ -140,7 +141,16 @@ const Html = /* @__PURE__ */React.forwardRef(({
+   }, [occlude]);
+   React.useLayoutEffect(() => {
+     if (group.current) {
+-      const currentRoot = root.current = ReactDOM.createRoot(el);
++      // Reuse the root if its teardown is still pending (StrictMode's immediate
++      // remount): calling createRoot twice on the same container is an error.
++      let currentRoot;
++      if (pendingUnmount.current !== null && root.current) {
++        clearTimeout(pendingUnmount.current);
++        pendingUnmount.current = null;
++        currentRoot = root.current;
++      } else {
++        currentRoot = root.current = ReactDOM.createRoot(el);
++      }
+       scene.updateMatrixWorld();
+       if (transform) {
+         el.style.cssText = `position:absolute;top:0;left:0;pointer-events:none;overflow:hidden;`;
+@@ -153,7 +163,14 @@ const Html = /* @__PURE__ */React.forwardRef(({
+       }
+       return () => {
+         if (target) target.removeChild(el);
+-        currentRoot.unmount();
++        // Deferred: unmounting a root synchronously while another React root is
++        // committing logs "Attempted to synchronously unmount a root while React
++        // was already rendering" (StrictMode remounts, route changes).
++        pendingUnmount.current = setTimeout(() => {
++          pendingUnmount.current = null;
++          if (root.current === currentRoot) root.current = null;
++          currentRoot.unmount();
++        }, 0);
+       };
+     }
+   }, [target, transform]);
