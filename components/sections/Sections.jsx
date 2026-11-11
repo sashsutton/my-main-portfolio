@@ -139,31 +139,6 @@ export function Work() {
   );
 }
 
-/* -------------------------------------------------------------------- next */
-
-export function Next() {
-  const { t } = useLang();
-  return (
-    <section id="next" data-section className="section">
-      <div className={styles.block}>
-        <SectionHead title={t.next.title} />
-        <ul className={styles.numbered}>
-          {t.next.body.map((line, i) => (
-            <Reveal as="li" key={i} delay={i * 0.06} className={styles.numberedItem}>
-              <span className={`mono ${styles.numberedIndex}`}>
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <p className="body-copy" style={{ margin: 0 }}>
-                {line}
-              </p>
-            </Reveal>
-          ))}
-        </ul>
-      </div>
-    </section>
-  );
-}
-
 /* ----------------------------------------------------------------- contact */
 
 export function Contact() {

@@ -4,7 +4,7 @@ import dynamic from "next/dynamic";
 import Nav from "@/components/ui/Nav";
 import Loader from "@/components/ui/Loader";
 import Scrim from "@/components/ui/Scrim";
-import { About, Contact, Hero, Next, Work } from "@/components/sections/Sections";
+import { About, Contact, Hero, Work } from "@/components/sections/Sections";
 
 /**
  * three.js + drei + postprocessing is by far the heaviest thing on the page and
@@ -28,7 +28,6 @@ export default function Home() {
         <Hero />
         <About />
         <Work />
-        <Next />
         <Contact />
       </main>
     </>
