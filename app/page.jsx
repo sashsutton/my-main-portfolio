@@ -30,6 +30,11 @@ export default function Home() {
         <Work />
         <Contact />
       </main>
+
+      {/* Grain + scanlines over the CRT page only; the reading pages
+          (/science, /music) stay clean. */}
+      <div className="veil" aria-hidden />
+      <div className="grain" aria-hidden />
     </>
   );
 }

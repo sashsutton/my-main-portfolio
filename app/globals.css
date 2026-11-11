@@ -5,6 +5,39 @@
 @import "tailwindcss/theme.css" layer(theme);
 @import "tailwindcss/utilities.css" layer(utilities);
 
+/* Design tokens for Tailwind utilities (bg-ink, text-paper, border-rule, …).
+   font-sans / font-mono / font-serif already resolve to the next/font
+   variables set in app/layout.jsx, so they need no entry here. */
+@theme {
+  --color-ink: #07080a;
+  --color-paper: #ece9e2;
+  --color-muted: #bdbab2;
+  --color-subtle: #8e8b84;
+  --color-faint: #63615c;
+  --color-rule: rgb(236 233 226 / 0.12);
+  --color-phosphor: #7cffb2;
+  --color-phosphor-dim: #3fbf7f;
+  --color-crt-amber: #ffb454;
+}
+
+/* Fade-and-rise as a block scrolls into view — pure CSS scroll-driven
+   animation, no JS. Browsers without animation-timeline just show the block. */
+@keyframes reveal {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+  }
+}
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) {
+    .reveal {
+      animation: reveal linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 35%;
+    }
+  }
+}
+
 /* ============================================================================
    Design tokens — warm retro-tech: bakelite black, phosphor green, CRT amber.
    ========================================================================= */

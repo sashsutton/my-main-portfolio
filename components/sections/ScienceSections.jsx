@@ -1,44 +1,45 @@
 "use client";
 
-import Link from "next/link";
 import { useLang } from "@/components/providers/LanguageProvider";
 import { shared } from "@/lib/content";
-import Reveal from "./Reveal";
-import styles from "./science.module.css";
-import sections from "./sections.module.css";
+import { ExternalLink, PageHeader, Section } from "./PageParts";
 
-/**
- * Anything absolute leaves the site, so it opens in its own tab and never
- * goes through next/link — Link would try to navigate the current page to it,
- * which loses the visitor's place on this one.
- */
-const isExternal = (href) => /^https?:\/\//.test(href);
+/** /science: header, the published paper, projects, education. */
 
-/* --------------------------------------------------------------- shared -- */
-
-function SectionHead({ title }) {
-  return (
-    <Reveal>
-      <h2 className="display">{title}</h2>
-      <div className="rule" />
-    </Reveal>
-  );
+export function ScienceHeader() {
+  const { t } = useLang();
+  return <PageHeader title={t.science.title} lead={t.science.lead} />;
 }
 
-/* ----------------------------------------------------------------- hero -- */
+/* ------------------------------------------------------------- research -- */
 
-export function ScienceHero() {
+export function Research() {
   const { t } = useLang();
+  const { research } = t.science;
+
   return (
-    <section id="top" data-section className={styles.hero}>
-      <div>
-        <h1 className={styles.heroTitle}>{t.science.title}</h1>
-        <p className={styles.heroLead}>{t.science.lead}</p>
-        <div className={`mono ${styles.heroRow}`}>
-          <span>{t.science.hint}</span>
-        </div>
-      </div>
-    </section>
+    <Section id="research" title={research.title}>
+      {shared.research.publications.map((pub) => {
+        const copy = research.entries[pub.id];
+        return (
+          <article key={pub.id} className="border-l-2 border-phosphor-dim pl-6 sm:pl-8">
+            {/* The paper's real French title, verbatim in both locales — a
+                citation, not UI copy. */}
+            <h3 className="m-0 font-serif text-2xl font-normal leading-snug text-pretty text-paper sm:text-3xl">
+              {copy.title}
+            </h3>
+            <p className="mt-3 mb-0 font-mono text-xs uppercase tracking-[0.14em] text-subtle">
+              {copy.meta}
+            </p>
+            <p className="mt-4 mb-0 max-w-[62ch] leading-relaxed text-muted">{copy.blurb}</p>
+            <div className="mt-5 flex flex-wrap gap-6 text-phosphor">
+              <ExternalLink href={pub.hal}>{research.hal}</ExternalLink>
+              {pub.repo && <ExternalLink href={pub.repo}>{research.repo}</ExternalLink>}
+            </div>
+          </article>
+        );
+      })}
+    </Section>
   );
 }
 
@@ -49,109 +50,35 @@ export function Projects() {
   const { projects } = t.science;
 
   return (
-    <section id="projects" data-section className="section">
-      <div className={styles.block}>
-        <SectionHead title={projects.title} />
-
-        <div className={styles.projects}>
-          {shared.research.projects.map((project, i) => {
-            const copy = projects.entries[project.id];
-            return (
-              <Reveal key={project.id} delay={i * 0.06} className={styles.project}>
-                <div className={styles.projectHead}>
-                  <span className={`mono ${styles.projectNo}`}>{project.no}</span>
-                  <span className={`mono ${styles.projectYear}`}>{project.year}</span>
-                </div>
-
-                <h3 className={styles.projectTitle}>{copy.title}</h3>
-                <p className={styles.projectBlurb}>{copy.blurb}</p>
-
-                <div className={styles.stack}>
-                  {project.stack.map((item) => (
-                    <span key={item} className={`mono ${styles.stackItem}`}>
-                      {item}
-                    </span>
-                  ))}
-                </div>
-
-                {/* Links are optional: a project with neither a repo nor a demo
-                    simply renders without the row, rather than with dead chrome. */}
-                {(project.repo || project.demo) && (
-                  <div className={styles.projectLinks}>
-                    {project.repo && (
-                      <a
-                        className={`mono ${styles.projectLink}`}
-                        href={project.repo}
-                        target="_blank"
-                        rel="noreferrer noopener"
-                      >
-                        {projects.repo} ↗
-                      </a>
-                    )}
-                    {project.demo &&
-                      (isExternal(project.demo) ? (
-                        <a
-                          className={`mono ${styles.projectLink}`}
-                          href={project.demo}
-                          target="_blank"
-                          rel="noreferrer noopener"
-                        >
-                          {projects.demo} ↗
-                        </a>
-                      ) : (
-                        <Link className={`mono ${styles.projectLink}`} href={project.demo}>
-                          {projects.demo} →
-                        </Link>
-                      ))}
-                  </div>
-                )}
-              </Reveal>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
-}
-
-/* ----------------------------------------------------------------- research -- */
-export function Research() {
-  const { t } = useLang();
-  const { research } = t.science;
-
-  return (
-    <section id="research" data-section className="section">
-      <div className={styles.block}>
-        <SectionHead title={research.title} />
-
-        {shared.research.publications.map((pub, i) => {
-          const copy = research.entries[pub.id];
+    <Section id="projects" title={projects.title}>
+      <ul className="m-0 list-none p-0">
+        {shared.research.projects.map((project) => {
+          const copy = projects.entries[project.id];
           return (
-            <Reveal key={pub.id} delay={i * 0.06} className={styles.paper}>
-              {/* The title is the paper's real French title and stays verbatim
-                  in both locales — it is a citation, not UI copy, so it is not
-                  translated. The label chrome around it is. */}
-              <h3 className={styles.paperTitle}>{copy.title}</h3>
-              <p className={`mono ${styles.paperMeta}`}>{copy.meta}</p>
-              <p className={styles.paperBlurb}>{copy.blurb}</p>
-
-              <div className={styles.paperLinks}>
-                <a
-                  className={`mono ${styles.paperLink} ${styles.paperLinkPrimary}`}
-                  href={pub.hal}
-                  target="_blank"
-                  rel="noreferrer noopener"
-                >
-                  {research.hal} ↗
-                </a>
+            <li
+              key={project.id}
+              className="grid gap-3 border-t border-rule py-8 first:border-t-0 first:pt-0 sm:grid-cols-[4.5rem_1fr_auto] sm:gap-8"
+            >
+              <span className="pt-1 font-mono text-xs text-subtle">{project.year}</span>
+              <div>
+                <h3 className="m-0 font-mono text-lg font-medium text-paper">{copy.title}</h3>
+                <p className="mt-2 mb-0 max-w-[62ch] leading-relaxed text-muted">{copy.blurb}</p>
+                <p className="mt-3 mb-0 font-mono text-xs text-subtle">{project.stack.join(" · ")}</p>
               </div>
-            </Reveal>
+              {(project.repo || project.demo) && (
+                <div className="flex gap-6 pt-1 text-phosphor sm:flex-col sm:items-end sm:gap-3">
+                  {project.demo && <ExternalLink href={project.demo}>{projects.demo}</ExternalLink>}
+                  {project.repo && <ExternalLink href={project.repo}>{projects.repo}</ExternalLink>}
+                </div>
+              )}
+            </li>
           );
         })}
-      </div>
-    </section>
+      </ul>
+    </Section>
   );
 }
+
 /* ------------------------------------------------------------ education -- */
 
 export function Education() {
@@ -159,119 +86,57 @@ export function Education() {
   const { education } = t.science;
 
   return (
-    <section id="education" data-section className="section">
-      <div className={styles.block}>
-        <SectionHead title={education.title} />
-
-        <ol className={styles.timeline}>
-          {shared.research.education.map((item, i) => {
-            const copy = education.entries[item.id];
-            return (
-              <Reveal as="li" key={item.id} delay={i * 0.06} className={styles.timelineItem}>
-                <div className={styles.when}>
-                  <span className={`mono ${styles.years}`}>
-                    {item.from}
-                    <span className={styles.yearsDash}>—</span>
-                    {item.to}
-                  </span>
-                  <span className={`mono ${styles.eduLocation}`}>{copy.location}</span>
-                </div>
-                <div>
-                  <h3 className={styles.eduPlace}>
-                    {/* Links out to the official programme page. Falls back to
-                        plain text if an entry has no url, so adding one later is
-                        a content change only. */}
-                    {item.url ? (
-                      <a
-                        className={styles.eduLink}
-                        href={item.url}
-                        target="_blank"
-                        rel="noreferrer noopener"
-                      >
-                        {copy.place}
-                        <span className={styles.eduLinkMark} aria-hidden>
-                          ↗
-                        </span>
-                      </a>
-                    ) : (
-                      copy.place
-                    )}
-                  </h3>
-                  <p className={styles.eduProgramme}>{copy.programme}</p>
-                  {copy.detail && <p className={styles.eduDetail}>{copy.detail}</p>}
-                  {copy.coursework && (
-                    <p className={styles.eduCourse}>
-                      <span className={`mono ${styles.eduCourseLabel}`}>
-                        {education.coursework}
-                      </span>
+    <Section id="education" title={education.title}>
+      <ol className="m-0 list-none p-0">
+        {shared.research.education.map((item) => {
+          const copy = education.entries[item.id];
+          return (
+            <li
+              key={item.id}
+              className="grid gap-2 border-t border-rule py-8 first:border-t-0 first:pt-0 sm:grid-cols-[8rem_1fr] sm:gap-8"
+            >
+              <div className="pt-1 font-mono text-xs leading-relaxed text-subtle">
+                {item.from}–{item.to}
+                <br />
+                {copy.location}
+              </div>
+              <div>
+                <h3 className="m-0 text-lg font-medium text-paper">
+                  {item.url ? (
+                    <a
+                      href={item.url}
+                      target="_blank"
+                      rel="noreferrer noopener"
+                      className="underline-offset-4 hover:underline"
+                    >
+                      {copy.place} <span className="text-subtle">↗</span>
+                    </a>
+                  ) : (
+                    copy.place
+                  )}
+                </h3>
+                <p className="mt-1 mb-0 text-muted">{copy.programme}</p>
+                {copy.detail && (
+                  <p className="mt-3 mb-0 max-w-[62ch] text-sm leading-relaxed text-subtle">{copy.detail}</p>
+                )}
+                {/* Long coursework lists stay folded until asked for. */}
+                {copy.coursework && (
+                  <details className="group mt-4">
+                    <summary className="cursor-pointer list-none font-mono text-xs uppercase tracking-[0.14em] text-phosphor-dim hover:text-phosphor [&::-webkit-details-marker]:hidden">
+                      <span className="inline-block w-4 group-open:hidden">+</span>
+                      <span className="hidden w-4 group-open:inline-block">−</span>
+                      {education.coursework}
+                    </summary>
+                    <p className="mt-3 mb-0 max-w-[62ch] text-sm leading-relaxed text-subtle">
                       {copy.coursework}
                     </p>
-                  )}
-                </div>
-              </Reveal>
-            );
-          })}
-        </ol>
-      </div>
-    </section>
-  );
-}
-
-/* ---------------------------------------------------------------- focus -- */
-
-export function Focus() {
-  const { t } = useLang();
-  const { focus } = t.science;
-
-  return (
-    <section id="focus" data-section className="section">
-      <div className={styles.block}>
-        <SectionHead title={focus.title} />
-        <ul className={sections.numbered}>
-          {shared.research.focus.map((id, i) => (
-            <Reveal as="li" key={id} delay={i * 0.06} className={sections.numberedItem}>
-              <span className={`mono ${sections.numberedIndex}`}>
-                {String(i + 1).padStart(2, "0")}
-              </span>
-              <div>
-                <h3 className={styles.focusTitle}>{focus.entries[id].title}</h3>
-                <p className="body-copy" style={{ margin: 0 }}>
-                  {focus.entries[id].body}
-                </p>
+                  </details>
+                )}
               </div>
-            </Reveal>
-          ))}
-        </ul>
-      </div>
-    </section>
-  );
-}
-
-/* ---------------------------------------------------------------- outro -- */
-
-export function ScienceOutro() {
-  const { t } = useLang();
-  const { outro } = t.science;
-
-  return (
-    <section id="outro" data-section className={`section ${styles.outro}`}>
-      <div className={styles.block}>
-        <SectionHead title={outro.title} />
-        <Reveal>
-          <p className={styles.outroBody}>{outro.body}</p>
-        </Reveal>
-        <Reveal delay={0.08}>
-          <Link href="/" className={styles.backCta}>
-            ← {outro.cta}
-          </Link>
-        </Reveal>
-
-        <div className={`mono ${styles.footer}`}>
-          <span>
-            © {new Date().getFullYear()} {shared.name}
-          </span>
-        </div>
-      </div>
-    </section>
+            </li>
+          );
+        })}
+      </ol>
+    </Section>
   );
 }

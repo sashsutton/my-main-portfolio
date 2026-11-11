@@ -44,9 +44,6 @@ export default function RootLayout({ children }) {
       <body>
         <LanguageProvider>
           <SmoothScroll>{children}</SmoothScroll>
-          {/* Grain + scanlines sit above everything, including the canvas. */}
-          <div className="veil" aria-hidden />
-          <div className="grain" aria-hidden />
         </LanguageProvider>
         {/* Vercel Web Analytics — collects on the deployed site only. */}
         <Analytics />
