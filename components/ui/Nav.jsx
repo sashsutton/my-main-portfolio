@@ -11,7 +11,6 @@ import styles from "./ui.module.css";
 const ITEMS = [
   { id: "about", key: "about" },
   { id: "work", key: "work" },
-  { id: "next", key: "next" },
   { id: "contact", key: "contact" },
 ];
 
