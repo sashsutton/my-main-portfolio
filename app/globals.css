@@ -1,3 +1,10 @@
+/* Tailwind v4. Preflight (the base reset) is deliberately NOT imported yet:
+   the current design relies on browser defaults it would reset. It comes in
+   with the redesign (step 4). Theme + utilities only, so classes are available. */
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+
 /* ============================================================================
    Design tokens — warm retro-tech: bakelite black, phosphor green, CRT amber.
    ========================================================================= */
