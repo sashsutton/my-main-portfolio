@@ -28,7 +28,9 @@ export default function SceneCanvas() {
           // Cap DPR at 1.5 even on desktop: at this amount of bloom, the extra
           // pixels of a 2x buffer buy almost nothing and cost a lot.
           dpr={lowPower ? [1, 1] : [1, 1.5]}
-          shadows={!lowPower}
+          // "percentage" = PCFShadowMap. R3F's `true` asks for PCFSoftShadowMap,
+          // which three r185 deprecated and silently downgrades to this anyway.
+          shadows={lowPower ? false : "percentage"}
           gl={{
             antialias: false, // the composer's grain suits the CRT look anyway
             alpha: false,

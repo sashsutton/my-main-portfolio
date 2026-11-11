@@ -24,7 +24,7 @@ export default function VinylCanvas() {
         <Canvas
           style={{ pointerEvents: "auto" }}
           dpr={lowPower ? [1, 1] : [1, 1.5]}
-          shadows={!lowPower}
+          shadows={lowPower ? false : "percentage"}
           gl={{
             antialias: !lowPower,
             alpha: false,
